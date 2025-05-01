@@ -4,3 +4,10 @@ numpy
 librosa
 pandas
 matplotlib
+librosa
+audioread
+soundfile
+pydub
+ffmpeg
+ffmpeg
+librosa[ffmpeg]

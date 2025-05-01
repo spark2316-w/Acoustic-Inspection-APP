@@ -7,7 +7,7 @@ from datetime import datetime
 from io import BytesIO
 
 # ==== ตั้งค่า ====
-REF_FILE = 'Data\TestGG\Recording (107).m4a'
+REF_FILE = 'Data/TestGG/Recording (107).m4a'
 THRESHOLD_FILE = 'threshold_value.txt'
 EXCEL_LOG_FILE = 'sound_inspection_log.xlsx'
 SAMPLERATE = 44100

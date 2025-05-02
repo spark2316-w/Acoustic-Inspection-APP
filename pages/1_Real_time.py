@@ -80,7 +80,7 @@ except:
     st.error("❌ อ่าน Threshold ไม่ได้")
     st.stop()
 
-# ==== ใช้ st.audio_input เพื่อบันทึกเสียง ====
+# ==== บันทึกเสียงจากไมโครโฟน ====
 st.subheader("🎧 กดบันทึกเสียงเพื่อตรวจสอบ")
 audio_input = st.audio_input("พูดหรือเคาะเสียง จากไมโครโฟน")
 
@@ -117,5 +117,20 @@ if audio_input is not None:
         log_data = pd.concat([log_data, pd.DataFrame([new_entry])], ignore_index=True)
     except FileNotFoundError:
         log_data = pd.DataFrame([new_entry])
+
+    # บันทึกไฟล์จริง
     log_data.to_excel(EXCEL_LOG_FILE, index=False)
+
     st.success(f"📝 บันทึกผลลง `{EXCEL_LOG_FILE}` แล้ว")
+
+    # ==== ปุ่มดาวน์โหลด Excel ====
+    output = BytesIO()
+    log_data.to_excel(output, index=False, engine='openpyxl')
+    output.seek(0)
+
+    st.download_button(
+        label="📥 ดาวน์โหลดผลลัพธ์เป็น Excel",
+        data=output,
+        file_name=EXCEL_LOG_FILE,
+        mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+    )

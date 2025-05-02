@@ -155,9 +155,8 @@ with st.expander("📘 คู่มือการใช้งานแอปต
 - หากยังไม่มี Threshold ให้เริ่มต้นที่ `0.75` เป็นค่าพื้นฐาน
     """)
 
-# ==== Footer ====
 st.markdown("""
 <div class="footer">
-    Made with ❤️ by <strong>Theeraphat</strong>
+    Made with ❤️ by [Theeraphat,Amika]
 </div>
 """, unsafe_allow_html=True)

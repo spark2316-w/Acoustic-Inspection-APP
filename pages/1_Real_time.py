@@ -1,5 +1,4 @@
 import streamlit as st
-import streamlit.components.v1 as components
 import numpy as np
 import librosa
 import pandas as pd
@@ -7,14 +6,12 @@ import matplotlib.pyplot as plt
 from datetime import datetime
 from io import BytesIO
 
-# ==== ตั้งค่า ==== 
-REF_FILE = r'Data/TestGG/Recording_107.m4a'
-THRESHOLD_FILE = 'threshold_value.txt'
-EXCEL_LOG_FILE = 'sound_inspection_log.csv'  # เปลี่ยนเป็น .csv
+# ==== ตั้งค่าเบื้องต้น ====
+EXCEL_LOG_FILE = 'sound_inspection_log.xlsx'
 SAMPLERATE = 44100
 MIN_AMPLITUDE = 0.05
 
-# ==== ฟังก์ชันช่วย ==== 
+# ==== ฟังก์ชันช่วย ====
 def normalize_audio(y):
     return y / np.max(np.abs(y)) if np.max(np.abs(y)) > 0 else y
 
@@ -48,97 +45,85 @@ def plot_correlation_bar(corr_abs, threshold):
     ax.legend()
     st.pyplot(fig)
 
-# ==== โหลดเสียงอ้างอิงและ Threshold ==== 
-ref_y, sr = librosa.load(REF_FILE, sr=SAMPLERATE, mono=True)
-ref_y = normalize_audio(ref_y)
-
-with open(THRESHOLD_FILE, 'r') as f:
-    threshold = float(f.read().strip())
-
-# ==== UI ==== 
+# ==== UI: ส่วนหัว ====
 st.title("🔍 ตรวจสอบเสียงด้วย Correlation")
-st.write(f"🎯 **Threshold ที่ใช้:** `{threshold:.4f}`")
 
-# ใช้ JavaScript สำหรับการบันทึกเสียงจากไมโครโฟน
-record_audio_html = """
-    <script>
-    let audioBlob;
-    const startButton = document.getElementById("start-button");
-    const stopButton = document.getElementById("stop-button");
-    const audioElement = document.getElementById("audio-element");
+# ==== UI: อัปโหลดเสียงอ้างอิง ====
+st.subheader("📥 อัปโหลดเสียงอ้างอิง (Reference Sound)")
+ref_file = st.file_uploader("อัปโหลดไฟล์เสียงอ้างอิง (.wav, .m4a, .mp3)", type=['wav', 'm4a', 'mp3'])
 
-    let mediaRecorder;
-    const chunks = [];
-
-    startButton.onclick = () => {
-        navigator.mediaDevices.getUserMedia({ audio: true })
-        .then(stream => {
-            mediaRecorder = new MediaRecorder(stream);
-            mediaRecorder.ondataavailable = e => chunks.push(e.data);
-            mediaRecorder.onstop = () => {
-                audioBlob = new Blob(chunks, { type: "audio/wav" });
-                const audioUrl = URL.createObjectURL(audioBlob);
-                audioElement.src = audioUrl;
-                window.audioBlob = audioBlob;
-            };
-            mediaRecorder.start();
-        });
-    };
-
-    stopButton.onclick = () => {
-        mediaRecorder.stop();
-    };
-    </script>
-    <button id="start-button">Start Recording</button>
-    <button id="stop-button">Stop Recording</button>
-    <audio id="audio-element" controls></audio>
-"""
-
-components.html(record_audio_html, height=300)
-
-# ให้ผู้ใช้สามารถส่งข้อมูลเสียงจาก JavaScript กลับมา
-if "audioBlob" in globals():
-    audio_data = globals()["audioBlob"]
-    st.audio(audio_data, format="audio/wav")
-
-    # หลังจากบันทึกเสียงเสร็จแล้ว, ทำการประมวลผลเสียง
+if ref_file is not None:
     try:
-        # โหลดเสียงจาก BytesIO
-        audio_bytes = BytesIO(audio_data)
-        y_input, _ = librosa.load(audio_bytes, sr=SAMPLERATE, mono=True)
-        y_input = normalize_audio(y_input)
-        peak_amp = np.max(np.abs(y_input))
-
-        if peak_amp < MIN_AMPLITUDE:
-            st.warning(f"🔇 ไม่พบเสียงการเคาะ (Peak Amplitude = {peak_amp:.4f}) → ยกเลิกการวิเคราะห์")
-        else:
-            x_aligned, y_aligned = align_peak_to_peak(ref_y, y_input)
-
-            corr = np.corrcoef(x_aligned, y_aligned)[0, 1]
-            corr_abs = abs(corr)
-            status = "✅ Good" if corr_abs >= threshold else "❌ Faulty"
-
-            st.subheader("📊 ผลการวิเคราะห์")
-            st.write(f"**Correlation:** `{corr_abs:.4f}` → {status}")
-
-            st.subheader("📈 กราฟเสียง (Aligned)")
-            plot_waveform(x_aligned, y_aligned)
-
-            st.subheader("📉 ค่าความสัมพันธ์ (Correlation)")
-            plot_correlation_bar(corr_abs, threshold)
-
-            # บันทึกผล
-            now = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-            new_entry = {'Datetime': now, 'Correlation': corr_abs, 'Result': status}
-
-            try:
-                log_data = pd.read_csv(EXCEL_LOG_FILE)
-                log_data = log_data.append(new_entry, ignore_index=True)
-            except FileNotFoundError:
-                log_data = pd.DataFrame([new_entry])
-
-            log_data.to_csv(EXCEL_LOG_FILE, index=False)  # บันทึกเป็น CSV
-            st.success(f"📝 บันทึกผลลงไฟล์ `{EXCEL_LOG_FILE}` เรียบร้อยแล้ว")
-
+        ref_bytes = BytesIO(ref_file.read())
+        ref_y, sr = librosa.load(ref_bytes, sr=SAMPLERATE, mono=True)
+        ref_y = normalize_audio(ref_y)
+        st.success("✅ โหลดเสียงอ้างอิงสำเร็จแล้ว")
     except Exception as e:
-        st.error(f"❌ เกิดข้อผิดพลาดในการอ่านไฟล์เสียง: {str(e)}")
+        st.error(f"❌ ไม่สามารถโหลดเสียงอ้างอิงได้: {str(e)}")
+        st.stop()
+else:
+    st.warning("⚠️ กรุณาอัปโหลดเสียงอ้างอิงก่อน")
+    st.stop()
+
+# ==== UI: อัปโหลด Threshold ====
+st.subheader("📊 อัปโหลดไฟล์ Threshold (.txt)")
+threshold_file = st.file_uploader("อัปโหลดไฟล์ threshold (.txt)", type=['txt'])
+
+if threshold_file is not None:
+    try:
+        threshold = float(threshold_file.read().decode().strip())
+        st.success(f"✅ โหลด Threshold สำเร็จ: `{threshold:.4f}`")
+    except Exception as e:
+        st.error(f"❌ ไม่สามารถอ่าน Threshold ได้: {str(e)}")
+        st.stop()
+else:
+    st.warning("⚠️ กรุณาอัปโหลดไฟล์ Threshold ก่อน")
+    st.stop()
+
+# ==== UI: อัดเสียงหรืออัปโหลดเสียงตรวจสอบ ====
+st.subheader("🎙️ อัดหรืออัปโหลดเสียงเพื่อตรวจสอบ")
+audio_file = st.audio_input("กรุณาอัดเสียงหรืออัปโหลดไฟล์เสียง")
+
+if audio_file is not None:
+    if "audio" not in audio_file.type:
+        st.warning("⚠️ กรุณาอัปโหลดเฉพาะไฟล์เสียงเท่านั้น")
+    else:
+        try:
+            audio_bytes = BytesIO(audio_file.read())
+            y_input, _ = librosa.load(audio_bytes, sr=SAMPLERATE, mono=True)
+            y_input = normalize_audio(y_input)
+            peak_amp = np.max(np.abs(y_input))
+
+            if peak_amp < MIN_AMPLITUDE:
+                st.warning(f"🔇 ไม่พบเสียงการเคาะ (Peak Amplitude = {peak_amp:.4f}) → ยกเลิกการวิเคราะห์")
+            else:
+                x_aligned, y_aligned = align_peak_to_peak(ref_y, y_input)
+                corr = np.corrcoef(x_aligned, y_aligned)[0, 1]
+                corr_abs = abs(corr)
+                status = "✅ Good" if corr_abs >= threshold else "❌ Faulty"
+
+                # ==== แสดงผล ====
+                st.subheader("📊 ผลการวิเคราะห์")
+                st.write(f"**Correlation:** `{corr_abs:.4f}` → {status}")
+
+                st.subheader("📈 กราฟเสียง (Aligned)")
+                plot_waveform(x_aligned, y_aligned)
+
+                st.subheader("📉 ค่าความสัมพันธ์ (Correlation)")
+                plot_correlation_bar(corr_abs, threshold)
+
+                # ==== บันทึกผล ====
+                now = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+                new_entry = {'Datetime': now, 'Correlation': corr_abs, 'Result': status}
+
+                try:
+                    log_data = pd.read_excel(EXCEL_LOG_FILE)
+                    log_data = log_data._append(new_entry, ignore_index=True)
+                except FileNotFoundError:
+                    log_data = pd.DataFrame([new_entry])
+
+                log_data.to_excel(EXCEL_LOG_FILE, index=False)
+                st.success(f"📝 บันทึกผลลงไฟล์ `{EXCEL_LOG_FILE}` เรียบร้อยแล้ว")
+
+        except Exception as e:
+            st.error(f"❌ เกิดข้อผิดพลาดในการประมวลผลเสียง: {str(e)}")

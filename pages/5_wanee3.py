@@ -1,58 +1,44 @@
 import streamlit as st
 import numpy as np
-import pandas as pd
-import matplotlib.pyplot as plt
 from scipy.io import wavfile
 from scipy.signal import correlate
+import matplotlib.pyplot as plt
 from io import BytesIO
-import tempfile
+import pandas as pd
 
-# ==== ฟังก์ชันแปลงไฟล์ .wav เป็น normalized numpy ====
-def audio_to_normalized_numpy(wav_path_or_bytes):
-    sample_rate, samples = wavfile.read(wav_path_or_bytes)
+st.set_page_config(page_title="🎤 Real-time Audio Comparison", layout="wide")
+st.title("🎤 เปรียบเทียบเสียงแบบ Real-time ด้วย Cross-Correlation")
+
+# อัปโหลดไฟล์ reference
+reference_file = st.file_uploader("📌 อัปโหลด Reference .wav", type=["wav"])
+
+# บันทึกเสียงทดสอบผ่านไมโครโฟน
+audio_data = st.audio_input("🎙️ บันทึกเสียงทดสอบ (Test Audio)")
+
+def audio_to_normalized_numpy(file):
+    sr, samples = wavfile.read(file)
     if samples.ndim > 1:
-        samples = samples[:, 0]  # ถ้าเป็น stereo เอาแค่ channel แรก
+        samples = samples[:, 0]
     samples = samples.astype(np.float32)
     samples -= np.mean(samples)
     samples /= np.std(samples) + 1e-9
     return samples
 
-# ==== UI ตั้งค่า ====
-st.set_page_config(page_title="🎙️ Real-time Audio Comparison", layout="wide")
-st.title("🎙️ เปรียบเทียบเสียง Real-Time กับ Reference WAV")
-
-st.markdown("อัปโหลดไฟล์ **อ้างอิง (.wav)** จากนั้น **บันทึกเสียงจริงผ่านไมโครโฟน** เพื่อเปรียบเทียบความคล้ายคลึง")
-
-# ==== Upload Reference File ====
-reference_file = st.file_uploader("📌 อัปโหลด Reference .wav", type=["wav"], key="ref_upload")
-
-# ==== Audio Input ====
-recorded_audio = st.audio_input("🎤 บันทึกเสียงผ่านไมโครโฟน (Test Audio)", type="wav")
-
-# ==== เมื่อตรวจสอบว่าพร้อม ====
-if reference_file and recorded_audio:
-    st.success("✅ เริ่มประมวลผล")
-
-    # แปลงไฟล์อ้างอิง
+if reference_file and audio_data:
     ref_signal = audio_to_normalized_numpy(reference_file)
+    test_signal = audio_to_normalized_numpy(audio_data)
 
-    # แปลงไฟล์เสียงที่อัดผ่านไมค์ (ต้องบันทึกเป็น temp file ก่อน)
-    with tempfile.NamedTemporaryFile(delete=False, suffix=".wav") as tmpfile:
-        tmpfile.write(recorded_audio.read())
-        tmp_path = tmpfile.name
+    st.success("✅ ได้รับไฟล์ทั้งสองแล้ว เริ่มวิเคราะห์...")
 
-    test_signal = audio_to_normalized_numpy(tmp_path)
-
-    # ==== พล็อตสัญญาณ ====
-    st.subheader("🔊 สัญญาณเสียง")
+    # แสดงสัญญาณ
     fig, axs = plt.subplots(2, 1, figsize=(12, 6))
-    axs[0].plot(ref_signal, color="blue")
+    axs[0].plot(ref_signal, color='blue')
     axs[0].set_title("Reference Signal")
-    axs[1].plot(test_signal, color="red")
-    axs[1].set_title("Recorded Test Signal")
+    axs[1].plot(test_signal, color='red')
+    axs[1].set_title("Test Signal")
     st.pyplot(fig)
 
-    # ==== คำนวณ Cross-Correlation ====
+    # Cross-correlation
     cross_corr = correlate(ref_signal, test_signal, mode='full', method='auto')
     max_corr = np.max(cross_corr) / len(ref_signal)
     lags = np.arange(-(len(test_signal) - 1), len(ref_signal))
@@ -65,7 +51,7 @@ if reference_file and recorded_audio:
     ax2.grid(True)
     st.pyplot(fig2)
 
-    # ==== วิเคราะห์ความคล้ายคลึง ====
+    # ความคล้ายคลึง
     if max_corr > 0.3:
         similarity = "✅ Very Similar"
     elif max_corr > 0.2:
@@ -73,4 +59,9 @@ if reference_file and recorded_audio:
     else:
         similarity = "❌ Not Similar"
 
-    st.markdown(f"### 🔍 ผลลัพธ์: **{similarity}** (Max Corr = `{max_corr:.5f}`)")
+    df = pd.DataFrame([{
+        "Max Correlation": round(max_corr, 5),
+        "Similarity": similarity
+    }])
+    st.subheader("📊 ผลการวิเคราะห์")
+    st.dataframe(df)

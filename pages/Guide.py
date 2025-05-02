@@ -1,7 +1,22 @@
 import streamlit as st
 from PIL import Image
+from io import BytesIO
+import base64
 
 st.set_page_config(page_title="Acoustic Inspection Guide", page_icon="📘", layout="wide")
+
+# ==== Helper ====
+def image_to_base64(image_path):
+    img = Image.open(image_path)
+    buffered = BytesIO()
+    img.save(buffered, format="PNG")
+    return base64.b64encode(buffered.getvalue()).decode()
+
+# ==== Load Images as Base64 ====
+logo1_b64 = image_to_base64("images/logo1.png")
+logo2_b64 = image_to_base64("images/logo2.png")
+sm57_b64 = image_to_base64("images/SM57.png")
+bmg11s_b64 = image_to_base64("images/interface.png")
 
 # ==== Custom CSS ====
 st.markdown("""
@@ -51,13 +66,14 @@ div[data-testid="stExpander"] span {
 </style>
 """, unsafe_allow_html=True)
 
-# ==== Header Logos ====
-col1, col2, col3 = st.columns([1, 2, 1])
-with col2:
-    st.image("images/logo1.png", width=120)
-    st.image("images/logo2.png", width=120)
+# ==== Header ====
+st.markdown(f"""
+<div class="logo-bar">
+    <img src="data:image/png;base64,{logo1_b64}" alt="logo1">
+    <img src="data:image/png;base64,{logo2_b64}" alt="logo2">
+</div>
+""", unsafe_allow_html=True)
 
-# ==== Header Title ====
 st.markdown("""
 <div style='text-align: center;'>
     <h1 style='color: white; font-size: 100px; font-weight: bold;'>
@@ -69,7 +85,7 @@ st.markdown("""
 </div>
 """, unsafe_allow_html=True)
 
-# ==== อุปกรณ์ ====
+# ==== คู่มืออุปกรณ์ ====
 with st.expander("🎤 อุปกรณ์ที่ใช้ในการตรวจสอบเสียง"):
     st.markdown("""
 ### 🔧 รายการอุปกรณ์ที่ใช้ในการเก็บข้อมูลเสียง
@@ -80,7 +96,7 @@ with st.expander("🎤 อุปกรณ์ที่ใช้ในการต
 - ความถี่ตอบสนอง: 40Hz – 15kHz
 - รองรับระดับเสียงสูงสุด (SPL) ถึง 150dB
     """)
-    st.image("images/SM57.png", width=400, caption="Shure SM57")
+    st.markdown(f'<img src="data:image/png;base64,{sm57_b64}" width="400">', unsafe_allow_html=True)
 
     st.markdown("""
 #### 🔈 อินเทอร์เฟซเสียง: Bomge BMG-11S
@@ -88,7 +104,7 @@ with st.expander("🎤 อุปกรณ์ที่ใช้ในการต
 - มีพอร์ต XLR พร้อม Phantom Power 48V สำหรับไมโครโฟนคอนเดนเซอร์
 - เหมาะสำหรับการบันทึกเสียงในสตูดิโอและการสตรีมมิง
     """)
-    st.image("images/interface.png", width=400, caption="Bomge BMG-11S")
+    st.markdown(f'<img src="data:image/png;base64,{bmg11s_b64}" width="400">', unsafe_allow_html=True)
 
     st.markdown("""
 #### 🧱 วัสดุที่ใช้ทดสอบ
@@ -108,7 +124,7 @@ with st.expander("🎤 อุปกรณ์ที่ใช้ในการต
 - ทำการเคาะบริเวณเดียวกันทุกครั้งเพื่อความแม่นยำของข้อมูล
     """)
 
-# ==== คู่มือการใช้งานแอป ====
+# ==== คู่มือแอป ====
 with st.expander("📘 คู่มือการใช้งานแอปตรวจสอบเสียง"):
     st.markdown("""
 ### 🧭 วิธีใช้งานแอป Acoustic Inspection

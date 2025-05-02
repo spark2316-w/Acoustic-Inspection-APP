@@ -5,7 +5,6 @@ import pandas as pd
 import matplotlib.pyplot as plt
 from datetime import datetime
 from io import BytesIO
-from pydub import AudioSegment
 
 # ==== ตั้งค่าเบื้องต้น ====
 EXCEL_LOG_FILE = 'sound_inspection_log.xlsx'
@@ -46,62 +45,53 @@ def plot_correlation_bar(corr_abs, threshold):
     ax.legend()
     st.pyplot(fig)
 
-def load_audio(file):
+def load_audio_from_bytes(file_bytes):
     try:
-        audio = AudioSegment.from_file(file)
-        wav_io = BytesIO()
-        audio.export(wav_io, format="wav")
-        wav_io.seek(0)
-        y, _ = librosa.load(wav_io, sr=SAMPLERATE, mono=True)
+        y, _ = librosa.load(BytesIO(file_bytes), sr=SAMPLERATE, mono=True)
         return normalize_audio(y)
     except Exception as e:
-        st.error(f"❌ ไม่สามารถโหลดหรือแปลงไฟล์เสียงได้: {str(e)}")
+        st.error(f"❌ ไม่สามารถโหลดเสียงได้: {str(e)}")
         return None
 
 # ==== UI ====
-st.title("🔍 ตรวจสอบเสียงด้วย Correlation")
+st.title("🎤 ตรวจสอบเสียงด้วย Correlation")
 
 # ==== อัปโหลดเสียงอ้างอิง ====
-st.subheader("📥 อัปโหลดเสียงอ้างอิง (Reference Sound)")
-ref_file = st.file_uploader("อัปโหลดไฟล์เสียงอ้างอิง (.wav, .m4a, .mp3)", type=['wav', 'm4a', 'mp3'])
-
+st.subheader("📥 อัปโหลดเสียงอ้างอิง (Reference)")
+ref_file = st.file_uploader("อัปโหลด .wav เท่านั้น", type=['wav'])
 if ref_file is None:
-    st.warning("⚠️ กรุณาอัปโหลดเสียงอ้างอิงก่อน")
+    st.warning("⚠️ กรุณาอัปโหลดไฟล์เสียงอ้างอิงก่อน")
     st.stop()
-
-ref_y = load_audio(ref_file)
+ref_y = load_audio_from_bytes(ref_file.read())
 if ref_y is None:
     st.stop()
-else:
-    st.success("✅ โหลดเสียงอ้างอิงสำเร็จแล้ว")
+st.success("✅ โหลดเสียงอ้างอิงสำเร็จ")
 
 # ==== อัปโหลด Threshold ====
 st.subheader("📊 อัปโหลดไฟล์ Threshold (.txt)")
 threshold_file = st.file_uploader("อัปโหลดไฟล์ threshold (.txt)", type=['txt'])
-
 if threshold_file is None:
-    st.warning("⚠️ กรุณาอัปโหลดไฟล์ Threshold ก่อน")
+    st.warning("⚠️ กรุณาอัปโหลด Threshold ก่อน")
     st.stop()
-
 try:
     threshold = float(threshold_file.read().decode().strip())
-    st.success(f"✅ โหลด Threshold สำเร็จ: `{threshold:.4f}`")
-except Exception as e:
-    st.error(f"❌ ไม่สามารถอ่าน Threshold ได้: {str(e)}")
+    st.success(f"✅ Threshold = {threshold:.4f}")
+except:
+    st.error("❌ อ่าน Threshold ไม่ได้")
     st.stop()
 
-# ==== อัปโหลดหรืออัดเสียงตรวจสอบ ====
-st.subheader("🎧 อัปโหลดเสียงเพื่อตรวจสอบ")
-audio_file = st.file_uploader("อัปโหลดไฟล์เสียงเพื่อตรวจสอบ (.wav, .m4a, .mp3)", type=['wav', 'm4a', 'mp3'])
+# ==== ใช้ st.audio_input เพื่อบันทึกเสียง ====
+st.subheader("🎧 กดบันทึกเสียงเพื่อตรวจสอบ")
+audio_input = st.audio_input("พูดหรือเคาะเสียง จากไมโครโฟน")
 
-if audio_file is not None:
-    y_input = load_audio(audio_file)
+if audio_input is not None:
+    y_input = load_audio_from_bytes(audio_input.getvalue())
     if y_input is None:
         st.stop()
 
     peak_amp = np.max(np.abs(y_input))
     if peak_amp < MIN_AMPLITUDE:
-        st.warning(f"🔇 ไม่พบเสียงการเคาะ (Peak Amplitude = {peak_amp:.4f}) → ยกเลิกการวิเคราะห์")
+        st.warning(f"🔇 ไม่พบเสียงที่ชัดเจน (Peak Amplitude = {peak_amp:.4f}) → ยกเลิกการวิเคราะห์")
         st.stop()
 
     x_aligned, y_aligned = align_peak_to_peak(ref_y, y_input)
@@ -122,12 +112,10 @@ if audio_file is not None:
     # ==== บันทึกผล ====
     now = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     new_entry = {'Datetime': now, 'Correlation': corr_abs, 'Result': status}
-
     try:
         log_data = pd.read_excel(EXCEL_LOG_FILE)
         log_data = pd.concat([log_data, pd.DataFrame([new_entry])], ignore_index=True)
     except FileNotFoundError:
         log_data = pd.DataFrame([new_entry])
-
     log_data.to_excel(EXCEL_LOG_FILE, index=False)
-    st.success(f"📝 บันทึกผลลงไฟล์ `{EXCEL_LOG_FILE}` เรียบร้อยแล้ว")
+    st.success(f"📝 บันทึกผลลง `{EXCEL_LOG_FILE}` แล้ว")

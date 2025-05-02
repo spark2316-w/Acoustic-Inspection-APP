@@ -5,9 +5,8 @@ import pandas as pd
 import matplotlib.pyplot as plt
 from datetime import datetime
 from io import BytesIO
-from pydub import AudioSegment
 
-# ==== ตั้งค่า ====
+# ==== ตั้งค่าเบื้องต้น ====
 EXCEL_LOG_FILE = 'sound_inspection_log.xlsx'
 SAMPLERATE = 44100
 MIN_AMPLITUDE = 0.05
@@ -46,54 +45,52 @@ def plot_correlation_bar(corr_abs, threshold):
     ax.legend()
     st.pyplot(fig)
 
-def convert_audio_to_wav(file):
+def load_audio(file):
     try:
-        audio = AudioSegment.from_file(file)
-        wav_io = BytesIO()
-        audio.export(wav_io, format="wav")
-        wav_io.seek(0)
-        y, _ = librosa.load(wav_io, sr=SAMPLERATE, mono=True)
+        y, _ = librosa.load(file, sr=SAMPLERATE, mono=True)
         return normalize_audio(y)
     except Exception as e:
-        st.error(f"❌ ไม่สามารถโหลดหรือแปลงไฟล์เสียง: {str(e)}")
+        st.error(f"❌ ไม่สามารถโหลดไฟล์เสียงได้: {str(e)}")
         return None
 
 # ==== UI ====
 st.title("🔍 ตรวจสอบเสียงด้วย Correlation")
 
-# อัปโหลดเสียงอ้างอิง
+# ==== อัปโหลดเสียงอ้างอิง ====
 st.subheader("📥 อัปโหลดเสียงอ้างอิง (Reference Sound)")
-ref_file = st.file_uploader("อัปโหลดไฟล์เสียงอ้างอิง (.wav, .m4a, .mp3)", type=['wav', 'm4a', 'mp3'])
+ref_file = st.file_uploader("อัปโหลดไฟล์เสียงอ้างอิง (.wav เท่านั้น)", type=['wav'])
 
-if ref_file:
-    ref_y = convert_audio_to_wav(ref_file)
-    if ref_y is None:
-        st.stop()
-else:
+if ref_file is None:
     st.warning("⚠️ กรุณาอัปโหลดเสียงอ้างอิงก่อน")
     st.stop()
 
-# อัปโหลด Threshold
+ref_y = load_audio(ref_file)
+if ref_y is None:
+    st.stop()
+else:
+    st.success("✅ โหลดเสียงอ้างอิงสำเร็จแล้ว")
+
+# ==== อัปโหลด Threshold ====
 st.subheader("📊 อัปโหลดไฟล์ Threshold (.txt)")
 threshold_file = st.file_uploader("อัปโหลดไฟล์ threshold (.txt)", type=['txt'])
 
-if threshold_file:
-    try:
-        threshold = float(threshold_file.read().decode().strip())
-        st.success(f"✅ โหลด Threshold สำเร็จ: `{threshold:.4f}`")
-    except Exception as e:
-        st.error(f"❌ ไม่สามารถอ่าน Threshold ได้: {str(e)}")
-        st.stop()
-else:
+if threshold_file is None:
     st.warning("⚠️ กรุณาอัปโหลดไฟล์ Threshold ก่อน")
     st.stop()
 
-# อัปโหลดเสียงเพื่อตรวจสอบ
-st.subheader("🎧 อัปโหลดเสียงเพื่อตรวจสอบ")
-audio_file = st.file_uploader("อัปโหลดไฟล์เสียงตรวจสอบ (.wav, .m4a, .mp3)", type=['wav', 'm4a', 'mp3'])
+try:
+    threshold = float(threshold_file.read().decode().strip())
+    st.success(f"✅ โหลด Threshold สำเร็จ: `{threshold:.4f}`")
+except Exception as e:
+    st.error(f"❌ ไม่สามารถอ่าน Threshold ได้: {str(e)}")
+    st.stop()
 
-if audio_file:
-    y_input = convert_audio_to_wav(audio_file)
+# ==== อัปโหลดหรืออัดเสียงตรวจสอบ ====
+st.subheader("🎧 อัปโหลดเสียงเพื่อตรวจสอบ")
+audio_file = st.file_uploader("อัปโหลดไฟล์เสียงเพื่อตรวจสอบ (.wav เท่านั้น)", type=['wav'])
+
+if audio_file is not None:
+    y_input = load_audio(audio_file)
     if y_input is None:
         st.stop()
 
@@ -107,7 +104,7 @@ if audio_file:
     corr_abs = abs(corr)
     status = "✅ Good" if corr_abs >= threshold else "❌ Faulty"
 
-    # แสดงผล
+    # ==== แสดงผล ====
     st.subheader("📊 ผลการวิเคราะห์")
     st.write(f"**Correlation:** `{corr_abs:.4f}` → {status}")
 
@@ -117,7 +114,7 @@ if audio_file:
     st.subheader("📉 ค่าความสัมพันธ์ (Correlation)")
     plot_correlation_bar(corr_abs, threshold)
 
-    # บันทึกผล
+    # ==== บันทึกผล ====
     now = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     new_entry = {'Datetime': now, 'Correlation': corr_abs, 'Result': status}
 

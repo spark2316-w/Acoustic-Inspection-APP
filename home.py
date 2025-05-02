@@ -155,14 +155,17 @@ st.markdown("""
     <div class="feature-item">
         <h3>🎤 ตรวจจับทันที</h3>
         <p>ฟังเสียงแบบ Real-time แล้ววิเคราะห์ได้ทันที</p>
+        <a href="/Real_time" target="_self" class="button">🎙️ Real-time ตรวจจับทันที</a>
     </div>
     <div class="feature-item">
         <h3>📂 อัปโหลดไฟล์</h3>
         <p>รองรับการวิเคราะห์ไฟล์เสียงที่บันทึกไว้</p>
+        <a href="/Drop_file" target="_self" class="button">📂 Upload ไฟล์เสียง</a>
     </div>
     <div class="feature-item">
-        <h3>🧠 วิเคราะห์ด้วย AI</h3>
-        <p>ประเมินคุณภาพวัสดุอัตโนมัติด้วย Machine Learning</p>
+        <h3>📘 คำแนะนำการใช้งาน AI</h3>
+        <p>แนะนำอุปกรณ์ที่ใช้และวิธีการใช้งาน App</p>
+        <a href="/Guide" target="_self" class="button">📘 คำแนะนำการใช้งาน</a>
     </div>
 </div>
 """, unsafe_allow_html=True)

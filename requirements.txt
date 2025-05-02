@@ -11,3 +11,4 @@ pydub
 ffmpeg
 ffmpeg
 librosa[ffmpeg]
+openpyxl

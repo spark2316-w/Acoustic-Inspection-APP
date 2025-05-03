@@ -213,18 +213,17 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 # --- Footer พร้อมลิงก์เพิ่มเติม ---
+
 st.markdown("""
 <div class="footer">
     Made with ❤️ by <strong>Theeraphat, Amika</strong><br>
     <div style="margin-top: 10px;">
-        <a href="https://github.com/your-repo-link" target="_blank" style="color: #ccc; margin: 0 10px; font-size: 18px;">
-            🐙 GitHub
-        </a>
-        |
-        <a href="https://forms.gle/your-feedback-form" target="_blank" style="color: #ccc; margin: 0 10px; font-size: 18px;">
-            ✉️ ส่ง Feedback
+        <a href="https://github.com/spark2316-w/acoustic-inspection-app" target="_blank" style="color: #ccc; margin: 0 10px; font-size: 24px;">
+            <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/github/github-original.svg" width="24" style="vertical-align: middle; margin-right: 8px;">
+            GitHub
         </a>
     </div>
 </div>
 """, unsafe_allow_html=True)
+
 

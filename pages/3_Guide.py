@@ -127,7 +127,7 @@ st.markdown(f"""
 
 st.markdown("""
 <div style='text-align: center;'>
-    <h1 style='color: white; font-size: 100px; font-weight: bold;'>
+    <h1>
         คำแนะนำการใช้งาน <span style="color: #1DA1F2;"> Apps</span>
     </h1>
     <p style="text-align: center; font-size: 24px; color: white;">
@@ -135,6 +135,7 @@ st.markdown("""
     </p>
 </div>
 """, unsafe_allow_html=True)
+
 
 # ==== คู่มืออุปกรณ์ ====
 with st.expander("🎤 อุปกรณ์ที่ใช้ในการตรวจสอบเสียง"):

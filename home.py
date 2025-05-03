@@ -119,6 +119,42 @@ h1 {{
     color: #999;
     font-size: 14px;
 }}
+
+/* ---------- รองรับหน้าจอมือถือ ---------- */
+@media (max-width: 768px) {{
+    h1 {{
+        font-size: 40px !important;
+    }}
+    .logo-bar {{
+        flex-direction: column;
+        gap: 15px;
+    }}
+    .logo-bar img {{
+        height: 70px;
+    }}
+    .button {{
+        padding: 15px 30px;
+        font-size: 18px;
+    }}
+    .button-container {{
+        flex-direction: column;
+        gap: 20px;
+    }}
+    .features {{
+        flex-direction: column;
+        align-items: center;
+    }}
+    .feature-item {{
+        width: 90%;
+        min-height: auto;
+    }}
+    .feature-item h3 {{
+        font-size: 22px;
+    }}
+    .feature-item p {{
+        font-size: 14px;
+    }}
+}}
 </style>
 """, unsafe_allow_html=True)
 
@@ -136,9 +172,10 @@ st.markdown("""
     <h1 style='color: white; font-size: 100px; font-weight: bold;'>
         Acoustic <span style="color: #1DA1F2;">Inspection</span> Apps
     </h1>
-<p style="text-align: center; font-size: 24px; color: white;">
-    ตรวจสอบวัสดุด้วยเสียงได้ทั้งแบบ Real-time และ Upload
-</p>
+    <p style="text-align: center; font-size: 24px; color: white;">
+        ตรวจสอบวัสดุด้วยเสียงได้ทั้งแบบ Real-time และ Upload
+    </p>
+</div>
 """, unsafe_allow_html=True)
 
 # --- ปุ่มเมนูหลัก ---
@@ -175,9 +212,19 @@ st.markdown("""
 </div>
 """, unsafe_allow_html=True)
 
-# --- Footer ---
+# --- Footer พร้อมลิงก์เพิ่มเติม ---
 st.markdown("""
 <div class="footer">
-    Made with ❤️ by [Theeraphat, Amika]
+    Made with ❤️ by <strong>Theeraphat, Amika</strong><br>
+    <div style="margin-top: 10px;">
+        <a href="https://github.com/your-repo-link" target="_blank" style="color: #ccc; margin: 0 10px; font-size: 18px;">
+            🐙 GitHub
+        </a>
+        |
+        <a href="https://forms.gle/your-feedback-form" target="_blank" style="color: #ccc; margin: 0 10px; font-size: 18px;">
+            ✉️ ส่ง Feedback
+        </a>
+    </div>
 </div>
 """, unsafe_allow_html=True)
+

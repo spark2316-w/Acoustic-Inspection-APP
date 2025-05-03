@@ -1,13 +1,14 @@
 import streamlit as st
 import numpy as np
 import soundfile as sf
-import librosa
 import matplotlib.pyplot as plt
 import io
 
-THRESHOLD_FREQ = 376  
+# ค่าตรวจสอบ
+THRESHOLD_FREQ = 376 
 MAX_ALLOWED_AMPLITUDE = 100
 
+# ฟังก์ชันวิเคราะห์เสียง
 def analyze_fft(y, sr):
     y = y / np.max(np.abs(y))  # Normalize
 
@@ -36,6 +37,7 @@ def analyze_fft(y, sr):
     else:
         st.success("✅ วัสดุดี")
 
+    # แสดงกราฟ FFT
     plt.figure(figsize=(10, 4))
     plt.plot(frequencies, magnitudes)
     plt.axvspan(376, 401, color='yellow', alpha=0.3, label='วัสดุดี (8600–8800 Hz)')
@@ -47,33 +49,38 @@ def analyze_fft(y, sr):
     plt.legend()
     st.pyplot(plt)
 
-# 👇 ส่วน UI
+# ส่วนแสดงผลในเว็บ
 st.title("🎙️ วิเคราะห์วัสดุด้วยเสียง")
 
-st.subheader("📤 วิธีเลือกเสียง:")
-mode = st.radio("เลือกรูปแบบเสียงที่ต้องการวิเคราะห์", ["🎧 อัดเสียงใหม่", "📁 อัปโหลดไฟล์ (.wav, .mp3, .m4a)"])
+mode = st.radio(
+    "เลือกรูปแบบเสียงที่ต้องการวิเคราะห์",
+    options=["record", "upload"],
+    format_func=lambda x: "🎧 อัดเสียงใหม่" if x == "record" else "📁 อัปโหลดไฟล์ (.wav เท่านั้น)"
+)
 
 audio_data = None
 sr = 44100
 
-if mode == "🎧 อัดเสียงใหม่":
+if mode == "record":
     audio_bytes = st.audio_input("กดปุ่มเพื่ออัดเสียง")
     if audio_bytes:
         with st.spinner("อ่านไฟล์..."):
             audio_buffer = io.BytesIO(audio_bytes.getvalue())
             y, sr = sf.read(audio_buffer)
             if y.ndim > 1:
-                y = y[:, 0]  # mono
+                y = y[:, 0]  # แปลงเป็น mono
             audio_data = y
 
-elif mode == "📁 อัปโหลดไฟล์ (.wav)":
-    uploaded_file = st.file_uploader("ลากไฟล์มาวาง หรือเลือกไฟล์เสียง", type=["wav"])
+elif mode == "upload":
+    uploaded_file = st.file_uploader("ลากไฟล์มาวาง หรือเลือกเฉพาะ .wav", type=["wav"])
     if uploaded_file:
         with st.spinner("กำลังโหลดไฟล์..."):
-            y, sr = librosa.load(uploaded_file, sr=44100)
+            y, sr = sf.read(uploaded_file)
+            if y.ndim > 1:
+                y = y[:, 0]
             audio_data = y
 
-# ✅ วิเคราะห์ถ้ามีข้อมูลเสียง
+# วิเคราะห์ถ้ามีเสียง
 if audio_data is not None:
     st.success("✅ โหลดเสียงเรียบร้อย กำลังวิเคราะห์...")
     analyze_fft(audio_data, sr)

@@ -63,6 +63,57 @@ div[data-testid="stExpander"] span {
     font-size: 20px;
     font-weight: bold;
 }
+/* ปุ่มเฉพาะใน .feature-item */
+.feature-item .button {{
+    display: block;
+    width: 100%;
+    margin-top: 20px;
+    font-size: 18px;
+    padding: 15px 0;
+}}
+
+.footer {{
+    margin-top: 100px;
+    text-align: center;
+    color: #999;
+    font-size: 14px;
+}}
+
+/* ---------- รองรับหน้าจอมือถือ ---------- */
+@media (max-width: 768px) {{
+    h1 {{
+        font-size: 40px !important;
+    }}
+    .logo-bar {{
+        flex-direction: column;
+        gap: 15px;
+    }}
+    .logo-bar img {{
+        height: 70px;
+    }}
+    .button {{
+        padding: 15px 30px;
+        font-size: 18px;
+    }}
+    .button-container {{
+        flex-direction: column;
+        gap: 20px;
+    }}
+    .features {{
+        flex-direction: column;
+        align-items: center;
+    }}
+    .feature-item {{
+        width: 90%;
+        min-height: auto;
+    }}
+    .feature-item h3 {{
+        font-size: 22px;
+    }}
+    .feature-item p {{
+        font-size: 14px;
+    }}
+}}
 </style>
 """, unsafe_allow_html=True)
 
@@ -155,8 +206,16 @@ with st.expander("📘 คู่มือการใช้งานแอปต
 - หากยังไม่มี Threshold ให้เริ่มต้นที่ `0.75` เป็นค่าพื้นฐาน
     """)
 
+# --- Footer พร้อมลิงก์เพิ่มเติม ---
+
 st.markdown("""
 <div class="footer">
-    Made with ❤️ by [Theeraphat,Amika]
+    Made with ❤️ by <strong>Theeraphat, Amika</strong><br>
+    <div style="margin-top: 10px;">
+        <a href="https://github.com/spark2316-w/acoustic-inspection-app" target="_blank" style="color: #ccc; margin: 0 10px; font-size: 24px;">
+            <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/github/github-original.svg" width="24" style="vertical-align: middle; margin-right: 8px;">
+            GitHub
+        </a>
+    </div>
 </div>
 """, unsafe_allow_html=True)

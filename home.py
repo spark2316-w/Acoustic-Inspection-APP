@@ -103,8 +103,6 @@ h1 {{
     font-size: 16px;
     margin-top: 10px;
 }}
-
-/* ปุ่มเฉพาะใน .feature-item */
 .feature-item .button {{
     display: block;
     width: 100%;
@@ -120,7 +118,6 @@ h1 {{
     font-size: 14px;
 }}
 
-/* ---------- รองรับหน้าจอมือถือ ---------- */
 @media (max-width: 768px) {{
     h1 {{
         font-size: 40px !important;
@@ -169,7 +166,7 @@ st.markdown(f"""
 # --- หัวเรื่องแอป ---
 st.markdown("""
 <div style='text-align: center;'>
-    <h1 style='color: white; font-size: 100px; font-weight: bold;'>
+    <h1>
         Acoustic <span style="color: #1DA1F2;">Inspection</span> Apps
     </h1>
     <p style="text-align: center; font-size: 24px; color: white;">
@@ -213,7 +210,6 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 # --- Footer พร้อมลิงก์เพิ่มเติม ---
-
 st.markdown("""
 <div class="footer">
     Made with ❤️ by <strong>Theeraphat, Amika</strong><br>
@@ -225,5 +221,3 @@ st.markdown("""
     </div>
 </div>
 """, unsafe_allow_html=True)
-
-

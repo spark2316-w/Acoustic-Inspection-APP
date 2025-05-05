@@ -178,9 +178,9 @@ st.markdown("""
 # --- ปุ่มเมนูหลัก ---
 st.markdown(f"""
 <div class="button-container">
+    <a href="/Guide" target="_self" class="button">📘 คู่มือการใช้งาน</a>
     <a href="/Steel" target="_self" class="button">🔩 ตรวจสอบท่อเหล็ก</a>
     <a href="/Brick" target="_self" class="button">🧱 ตรวจสอบอิฐมวลเบา</a>
-    <a href="/Guide" target="_self" class="button">📘 คู่มือการใช้งานxx</a>
 </div>
 <hr style="border: 1px solid white; margin: 50px 20px;">
 """, unsafe_allow_html=True)

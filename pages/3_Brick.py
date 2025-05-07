@@ -6,7 +6,7 @@ import io
 
 # ค่าตรวจสอบ
 THRESHOLD_FREQ = 376 
-MAX_ALLOWED_AMPLITUDE = 100
+MAX_ALLOWED_AMPLITUDE = 1000
 
 # ฟังก์ชันวิเคราะห์เสียง
 def analyze_fft(y, sr):

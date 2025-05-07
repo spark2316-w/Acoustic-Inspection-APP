@@ -40,7 +40,7 @@ def analyze_fft(y, sr):
     # แสดงกราฟ FFT
     plt.figure(figsize=(10, 4))
     plt.plot(frequencies, magnitudes)
-    plt.axvspan(8600, 8800, color='yellow', alpha=0.3, label='Good material (8600–8800 Hz)')
+    plt.axvspan(8600, 8800, color='green', alpha=0.3, label='Good material (8600–8800 Hz)')
     plt.title(f"FFT Spectrum (Peak = {peak_freq:.2f} Hz)")
     plt.xlabel("Frequency (Hz)")
     plt.ylabel("Magnitude")

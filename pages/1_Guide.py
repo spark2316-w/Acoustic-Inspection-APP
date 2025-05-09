@@ -198,6 +198,7 @@ with st.expander("📘 คู่มือการใช้งานแอปต
     st.markdown(f'<img src="data:image/png;base64,{Home_b64}" width="400">', unsafe_allow_html=True) #รูปหน้าเว็บ
     
     st.markdown("""
+#### 🔹 ขั้นตอนที่ 2: อัปโหลดเสียงอ้างอิง
 - เลือกเมนู **Upload Reference** เพื่ออัปโหลดเสียงอ้างอิง
 - อัปโหลดไฟล์ `.wav` ที่เป็นเสียงของวัสดุที่ดี (Reference)
 """)

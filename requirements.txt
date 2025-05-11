@@ -1,14 +1,10 @@
 streamlit
-Pillow
 numpy
-librosa
 pandas
 matplotlib
 librosa
-audioread
 soundfile
+audioread
+pillow
 pydub
-ffmpeg
-ffmpeg
-librosa[ffmpeg]
 openpyxl

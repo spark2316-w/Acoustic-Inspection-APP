@@ -10,7 +10,7 @@ import pytz  # สำหรับ timezone
 
 # ค่าตรวจสอบ
 THRESHOLD_FREQ = 376  
-MAX_ALLOWED_AMPLITUDE = 1000
+MAX_ALLOWED_AMPLITUDE = 2000
 EXCEL_FILE = "test_results_Brick.xlsx"
 BANGKOK_TZ = pytz.timezone("Asia/Bangkok")
 

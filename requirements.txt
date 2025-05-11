@@ -8,3 +8,4 @@ audioread
 pillow
 pydub
 openpyxl
+pytz

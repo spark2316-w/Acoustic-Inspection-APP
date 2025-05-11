@@ -6,11 +6,13 @@ import io
 import pandas as pd
 import os
 from datetime import datetime
+import pytz  # สำหรับ timezone
 
 # ค่าตรวจสอบ
 THRESHOLD_FREQ = 8600  
 MAX_ALLOWED_AMPLITUDE = 500
 EXCEL_FILE = "test_results.xlsx"
+BANGKOK_TZ = pytz.timezone("Asia/Bangkok")
 
 # ฟังก์ชันบันทึกผลลง Excel
 def save_to_excel(freq, amp, result):
@@ -20,7 +22,7 @@ def save_to_excel(freq, amp, result):
         df = pd.DataFrame(columns=["Timestamp", "Peak Frequency (Hz)", "Peak Amplitude", "Result"])
 
     new_row = {
-        "Timestamp": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+        "Timestamp": datetime.now(BANGKOK_TZ).strftime("%Y-%m-%d %H:%M:%S"),
         "Peak Frequency (Hz)": freq,
         "Peak Amplitude": amp,
         "Result": result
@@ -123,5 +125,11 @@ if os.path.exists(EXCEL_FILE):
     with st.expander("📥 ดาวน์โหลดไฟล์ Excel"):
         with open(EXCEL_FILE, "rb") as f:
             st.download_button("Download Excel", f, file_name=EXCEL_FILE)
+
+    # 🔴 ปุ่มลบข้อมูล
+    with st.expander("🗑️ ล้างข้อมูลทั้งหมด"):
+        if st.button("❌ ลบข้อมูลทั้งหมดใน Excel"):
+            os.remove(EXCEL_FILE)
+            st.success("ลบข้อมูลเรียบร้อยแล้ว กรุณารีเฟรชหน้าเว็บ")
 else:
     st.info("ยังไม่มีข้อมูลการทดสอบ")
